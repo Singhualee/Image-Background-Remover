@@ -14,7 +14,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Validate file type
     if (!image.type.startsWith('image/')) {
       return NextResponse.json(
         { success: false, error: 'Invalid file type' },
@@ -22,7 +21,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Validate file size (max 10MB)
     if (image.size > 10 * 1024 * 1024) {
       return NextResponse.json(
         { success: false, error: 'File too large (max 10MB)' },
@@ -31,7 +29,6 @@ export async function POST(req: NextRequest) {
     }
 
     const apiKey = process.env.REMOVE_BG_API_KEY;
-
     if (!apiKey) {
       return NextResponse.json(
         { success: false, error: 'API key not configured' },
@@ -39,9 +36,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Convert image to buffer
+    // Convert to base64 without Buffer (Cloudflare Workers compatible)
     const arrayBuffer = await image.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
+    const base64 = btoa(
+      new Uint8Array(arrayBuffer).reduce((data, byte) => data + String.fromCharCode(byte), '')
+    );
 
     // Call remove.bg API
     const response = await fetch('https://api.remove.bg/v1.0/removebg', {
@@ -49,12 +48,10 @@ export async function POST(req: NextRequest) {
       headers: {
         'X-Api-Key': apiKey,
       },
-      body: (() => {
-        const formData = new FormData();
-        formData.append('image_file', new Blob([buffer]), image.name);
-        formData.append('size', 'auto');
-        return formData;
-      })(),
+      body: JSON.stringify({
+        image_file_b64: base64,
+        size: 'auto',
+      }),
     });
 
     if (!response.ok) {
@@ -66,14 +63,15 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Get the result as array buffer
     const resultBuffer = await response.arrayBuffer();
-    const base64 = Buffer.from(resultBuffer).toString('base64');
+    const resultBase64 = btoa(
+      new Uint8Array(resultBuffer).reduce((data, byte) => data + String.fromCharCode(byte), '')
+    );
 
     return NextResponse.json({
       success: true,
       data: {
-        image: `data:image/png;base64,${base64}`,
+        image: `data:image/png;base64,${resultBase64}`,
       },
     });
   } catch (error) {
