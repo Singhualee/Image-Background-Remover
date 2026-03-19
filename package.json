@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "prebuild:cloudflare": "npm config set legacy-peer-deps true",
     "build:cloudflare": "next build",
     "start": "next start",
     "lint": "next lint",
