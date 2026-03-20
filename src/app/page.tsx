@@ -70,7 +70,15 @@ export default function Home() {
         body: formData,
       });
 
-      const data = await res.json();
+      const contentType = res.headers.get('content-type');
+      let data;
+      if (contentType && contentType.includes('application/json')) {
+        data = await res.json();
+      } else {
+        // Handle non-JSON response (e.g., Cloudflare error page)
+        const text = await res.text();
+        throw new Error(`Server error: ${res.status} - ${text.substring(0, 100)}`);
+      }
 
       if (!data.success) {
         throw new Error(data.error || 'Failed to process image');

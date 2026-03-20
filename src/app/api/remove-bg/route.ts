@@ -47,6 +47,7 @@ export async function POST(req: NextRequest) {
       method: 'POST',
       headers: {
         'X-Api-Key': apiKey,
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         image_file_b64: base64,
@@ -54,11 +55,24 @@ export async function POST(req: NextRequest) {
       }),
     });
 
-    if (!response.ok) {
+    const responseContentType = response.headers.get('content-type');
+
+    if (!response.ok || !responseContentType?.includes('image')) {
+      // Try to parse error response as JSON
       const errorText = await response.text();
-      console.error('Remove.bg API error:', errorText);
+      let errorMessage = 'Failed to remove background';
+
+      try {
+        const errorData = JSON.parse(errorText);
+        errorMessage = errorData.errors?.[0]?.title || errorData.errors?.[0]?.message || errorMessage;
+      } catch {
+        // If not JSON, use the text as is (truncated)
+        errorMessage = errorText.substring(0, 100);
+      }
+
+      console.error('Remove.bg API error:', errorMessage);
       return NextResponse.json(
-        { success: false, error: 'Failed to remove background' },
+        { success: false, error: errorMessage },
         { status: 500 }
       );
     }
