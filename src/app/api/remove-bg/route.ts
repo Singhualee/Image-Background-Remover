@@ -89,9 +89,10 @@ export async function POST(req: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Error processing image:', error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error('Error processing image:', errorMessage);
     return NextResponse.json(
-      { success: false, error: 'Internal server error' },
+      { success: false, error: `Server error: ${errorMessage}` },
       { status: 500 }
     );
   }
