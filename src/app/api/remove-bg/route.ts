@@ -36,11 +36,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Convert to base64 without Buffer (Cloudflare Workers compatible)
+    // Convert to base64 - Cloudflare Workers compatible
     const arrayBuffer = await image.arrayBuffer();
-    const base64 = btoa(
-      new Uint8Array(arrayBuffer).reduce((data, byte) => data + String.fromCharCode(byte), '')
-    );
+    const bytes = new Uint8Array(arrayBuffer);
+    let binary = '';
+    for (let i = 0; i < bytes.byteLength; i++) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+    const base64 = btoa(binary);
 
     // Call remove.bg API
     const response = await fetch('https://api.remove.bg/v1.0/removebg', {
