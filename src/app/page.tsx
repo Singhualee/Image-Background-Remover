@@ -70,14 +70,12 @@ export default function Home() {
         body: formData,
       });
 
-      const contentType = res.headers.get('content-type');
+      const text = await res.text();
       let data;
-      if (contentType && contentType.includes('application/json')) {
-        data = await res.json();
-      } else {
-        // Handle non-JSON response (e.g., Cloudflare error page)
-        const text = await res.text();
-        throw new Error(`Server error: ${res.status} - ${text.substring(0, 100)}`);
+      try {
+        data = JSON.parse(text);
+      } catch {
+        throw new Error(`Server error ${res.status}: ${text}`);
       }
 
       if (!data.success) {
