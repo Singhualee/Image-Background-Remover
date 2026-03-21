@@ -8,31 +8,31 @@ export async function POST(req: NextRequest) {
     const image = formData.get('image') as File | null;
 
     if (!image) {
-      return NextResponse.json(
-        { success: false, error: 'No image provided' },
-        { status: 400 }
+      return new Response(
+        JSON.stringify({ success: false, error: 'No image provided' }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
       );
     }
 
     if (!image.type.startsWith('image/')) {
-      return NextResponse.json(
-        { success: false, error: 'Invalid file type' },
-        { status: 400 }
+      return new Response(
+        JSON.stringify({ success: false, error: 'Invalid file type' }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
       );
     }
 
     if (image.size > 10 * 1024 * 1024) {
-      return NextResponse.json(
-        { success: false, error: 'File too large (max 10MB)' },
-        { status: 400 }
+      return new Response(
+        JSON.stringify({ success: false, error: 'File too large (max 10MB)' }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
       );
     }
 
     const apiKey = process.env.REMOVE_BG_API_KEY;
     if (!apiKey) {
-      return NextResponse.json(
-        { success: false, error: 'API key not configured' },
-        { status: 500 }
+      return new Response(
+        JSON.stringify({ success: false, error: 'API key not configured' }),
+        { status: 500, headers: { 'Content-Type': 'application/json' } }
       );
     }
 
@@ -72,9 +72,9 @@ export async function POST(req: NextRequest) {
       }
 
       console.error('Remove.bg API error:', errorMessage);
-      return NextResponse.json(
-        { success: false, error: errorMessage },
-        { status: 500 }
+      return new Response(
+        JSON.stringify({ success: false, error: errorMessage }),
+        { status: 500, headers: { 'Content-Type': 'application/json' } }
       );
     }
 
@@ -86,18 +86,26 @@ export async function POST(req: NextRequest) {
     }
     const resultBase64 = btoa(resultBinary);
 
-    return NextResponse.json({
-      success: true,
-      data: {
-        image: `data:image/png;base64,${resultBase64}`,
-      },
-    });
+    return new Response(
+      JSON.stringify({
+        success: true,
+        data: {
+          image: `data:image/png;base64,${resultBase64}`,
+        },
+      }),
+      { headers: { 'Content-Type': 'application/json' } }
+    );
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     console.error('Error processing image:', errorMessage);
-    return NextResponse.json(
-      { success: false, error: `Server error: ${errorMessage}` },
-      { status: 500 }
+
+    // Ensure we always return JSON
+    return new Response(
+      JSON.stringify({ success: false, error: `Server error: ${errorMessage}` }),
+      {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' }
+      }
     );
   }
 }
