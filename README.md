@@ -53,9 +53,11 @@ Or connect your GitHub repository to Cloudflare Pages:
 1. Go to Cloudflare Dashboard → Pages
 2. Connect to GitHub
 3. Select this repository
-4. Build command: `npm run build`
-5. Output directory: `.vercel/output/static`
-6. Add environment variable: `REMOVE_BG_API_KEY`
+4. Build command: `npx @cloudflare/next-on-pages@1` (runs `next build` internally), or `npm run build:cloudflare`
+5. **Output directory:** `.vercel/output/static` — must match `pages_build_output_dir` in `wrangler.toml`. If the dashboard still has `out`, change it or deploy will fail with `Output directory "out" not found`.
+6. Add environment variable: `REMOVE_BG_API_KEY` (Production / Preview). Pages Functions expose this as **`env.REMOVE_BG_API_KEY`** — this repo reads it from the handler `context.env`, not `process.env`, which is why the key must be set in the Cloudflare dashboard for the worker to see it.
+
+For local `wrangler pages dev`, copy `.dev.vars.example` to `.dev.vars` and put your key there.
 
 ## API
 

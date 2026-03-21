@@ -1,4 +1,11 @@
-export async function onRequestPost({ request }: { request: Request }) {
+interface Env {
+  REMOVE_BG_API_KEY?: string;
+}
+
+type PagesPostContext = { request: Request; env: Env };
+
+export async function onRequestPost(context: PagesPostContext) {
+  const { request, env } = context;
   try {
     const formData = await request.formData();
     const image = formData.get('image') as File | null;
@@ -24,7 +31,7 @@ export async function onRequestPost({ request }: { request: Request }) {
       );
     }
 
-    const apiKey = process.env.REMOVE_BG_API_KEY;
+    const apiKey = env.REMOVE_BG_API_KEY;
     if (!apiKey) {
       return new Response(
         JSON.stringify({ success: false, error: 'API key not configured' }),

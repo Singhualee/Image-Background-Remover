@@ -1,0 +1,2 @@
+{"sessionId":"3de45c","hypothesisId":"H1","location":"functions/api/remove-bg/index.ts:entry","message":"Env binding vs process.env (no secrets)","data":{"hasContextEnvKey":true,"hasProcessEnvKey":false,"processEnvDefined":false},"timestamp":1774062083647}
+{"sessionId":"3de45c","hypothesisId":"H2","location":"functions/api/remove-bg/index.ts:removebg-api","message":"remove.bg upstream non-image or error","data":{"httpStatus":403,"contentType":"application/json; charset=utf-8","errorSnippet":"API Key invalid"},"timestamp":1774062089165}
