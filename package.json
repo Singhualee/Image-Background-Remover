@@ -5,11 +5,10 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "prebuild:cloudflare": "npm config set legacy-peer-deps true",
-    "build:cloudflare": "next build",
+    "build:cloudflare": "npm run build && npx @cloudflare/next-on-pages",
     "start": "next start",
     "lint": "next lint",
-    "deploy": "npx @cloudflare/next-on-pages"
+    "deploy": "npm run build:cloudflare"
   },
   "dependencies": {
     "next": "15.5.2",
